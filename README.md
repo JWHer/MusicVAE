@@ -51,11 +51,11 @@
 
 [[유튜브]Music Generation with Magenta](https://www.youtube.com/watch?v=O4uBa0KMeNY)
 
-* 데이터 다운로드
+* 데이터 다운로드  
     [Groove MIDI Dataset](https://magenta.tensorflow.org/datasets/groove)
     <br/>
 
-* 데이터셋 만들기 - tfrecord
+* 데이터셋 만들기 - tfrecord  
     magenta [스크립트](https://github.com/magenta/magenta/tree/main/magenta/scripts) 이용
 
     ```shell
@@ -71,7 +71,7 @@
     ```
     <br/>
 
-* RNN 데이터셋 - 생략
+* RNN 데이터셋 - 생략  
     [시퀀스](https://github.com/magenta/magenta/tree/main/magenta/models/drums_rnn#create-sequenceexamples)
     [모델학습]()
     <br/>
@@ -87,7 +87,7 @@
     ```
     <br/>
 
-* 논문
+* 논문  
     hierarchical decoder의 nueral architecture를 파악해서 설정에 반영  
 
     ELBO 등 수학적 의미 학습
@@ -107,22 +107,22 @@
     --output_dir=data/generated/
     ```
 
-    WSL 팁
+    WSL 팁  
     `explorer.exe .`: 탐색기 실행
     귀찮게 `scp`나 `ftp`, `sftp` 설정을 안해도 된다.
 
     <br/>
 
-* 논문
+* 논문  
     학습 내용 전자electronic 문서화
     <br/>
 
 ## 4일차
 학습 잘 안됨 확인/ 레포지토리 작업
 
-* 학습 잘 안됨 확인
+* 학습 잘 안됨 확인  
     논문 내용 반영해서 config 수정, 재학습
     <br/>
 
-* 레포지토리 작업
+* 레포지토리 작업  
     gitub push
