@@ -126,3 +126,147 @@
 
 * 레포지토리 작업  
     gitub push
+    <br/>
+
+## 5일차
+
+* 추론  
+    ```shell
+    python3 music_vae_generate.py \
+    --config=hier-drums_4bar \
+    --run_dir=/mnt/q/model/v2/ \
+    --mode=sample \
+    --num_outputs=3 \
+    --output_dir=/home/jwher/data/generated/
+    ```
+    <br/>
+
+* 평가  
+    ```shell
+    python3 music_vae_train.py --config=hier-drums_4bar --run_dir=/mnt/q/model/v2/ --mode=eval --examples_path=/home/jwher/data/tfrecord/drummer1/session1.tfrecord
+    ```
+
+## 6일차
+    (없음)
+
+## 7일차
+설명
+
+### 이론
+ELBO와 KL Divergence
+(+추가)
+
+### 데이터셋과 전처리  
+* MIDI 파일 사용  
+* 한 샘플은 16개 note  
+1bar = 4bit =16note
+
+cat-drums_2bar_small모델을 바탕으로 만듬  
+```python
+CONFIG_MAP['hier-drums_4bar_small'] = Config(
+    model=MusicVAE(
+        lstm_models.BidirectionalLstmEncoder(),
+        lstm_models.HierarchicalLstmDecoder(
+            lstm_models.CategoricalLstmDecoder(),
+                level_lengths=[4, 16],
+                disable_autoregression=True)),
+    hparams=merge_hparams(
+        lstm_models.get_default_hparams(),
+        HParams(
+            batch_size=512,
+            max_seq_len=64,
+            z_size=256,
+            enc_rnn_size=[512],
+            dec_rnn_size=[256, 256],
+            free_bits=48,
+            max_beta=0.2,
+        )),
+    note_sequence_augmenter=None,
+    data_converter=data.DrumsConverter(
+        max_bars=100,  # Truncate long drum sequences before slicing.
+        slice_bars=4,
+        steps_per_quarter=4,
+        roll_input=True),
+    train_examples_path=None,
+    eval_examples_path=None,
+)
+```
+
+### 학습  
+* Encoder (Bidirection) 입력  
+    [batch_size, max_sequence_length, input_depth]
+
+    batch_size: 한번에 학습할 샘플 크기(512)
+
+    max_sequence_length: 가능한 연속 길이(16x4)
+
+    input_depth:  
+    ```python
+    #data.py
+    if roll_input:
+        input_depth = num_classes + 1 + add_end_token
+    ```
+    기본 드럼 종류: 9개 [kick, snare, closed_hh, open_hh, low_tom, mid_tom, hi_tom, crash, ride]  
+    roll_input: True(1)  
+    add_end_token: False(0)  
+    input_depth: 9+1+0=10  
+    따라서 16^10개의 악보가 가능하다.  
+
+    MIDI 파일은 note당 input_depth는 4이다(?). 각 노트의 파라미터는  
+    [ pitch, velocity, start_time, end_time ]이다.  
+    *확실한 출처 필요*  
+
+    [ 512x64x4 ] 차원으로 시간 순서에 따라 LSTM셀 1개는 [ 1x512x4 ] 입력을 받음.  
+    인코더 RNN은 양방향 LSTM으로써 64개의 LSTM셀(64bar 음악)이다. 이는 [ 1x512x4 ]으로 양방향 연결되어 있다.  
+    
+    > mu = W_hmu * h_T + b_mu  
+    > sigma = log(exp(W_hsigma + b_sigma) + 1)  
+    *W: 가중치 행렬, b: 편향 벡터*
+    의 정규분포(Gaussian distribution)로 표현될 수 있음  
+    
+    각각 512크기인 LSTM 레이어 한개를 가집니다.
+    ```python
+    # lstm_models.py - BidirectionalLstmEncoder
+    lstm_utils.build_bidirectional_lstm(
+        layer_sizes=hparams.enc_rnn_size,
+        dropout_keep_prob=hparams.dropout_keep_prob,
+        residual=hparams.residual_encoder,
+        is_training=is_training)
+    # lstm_utils.py
+    def build_bidirectional_lstm(
+        layer_sizes, dropout_keep_prob, residual, is_training):
+    ```
+    <br/>
+
+* Decoder (Hierarchical)  
+    긴 시퀀스를 학습하기 위해 conducter 레이어를 추가로 사용.
+    level_length = [ 4, 16 ]  
+    첫번째 레벨에 4개의 LSTM블록이 있고 두번째 레벨에선 각 첫번째 블록마다 16개의 LSTM블록이 있음. (4*16 = 64)  
+    각 LSTM블록의 셀 크기는 dec_rnn_size인 두개의 256셀 이다.  
+
+* free_bits, max_beta
+    KL loss 값을 줄이기 위해서 free_bits를 늘리거나 max_beta를 줄일 수 있다.  
+    하지만, 잠재적으로 나쁜 random sample을 얻을 수 있다.
+
+### 생성  
+
+1. z는 dense layer로 전달받는다. Conductor는 512LSTM 단위, state size는 256, 256이므로
+flatten size는 [512, 256, 256]이다.  
+1. 출력 dense layer는 flatten 상태의 합 512*1024이다.
+1. 분할?
+1. 각 분할이 lstm state size로 초기 상태
+1. 초기 상태에서 depth wize 디코딩이 되어 아래 레이어로 전달된다.
+1. Conductor의 출력은 다음 레벨의 decoder 입력이 된다.
+1. decoder는 단방향 lstm을 수행한다.
+1. Conductor는 core decoder와 독립적으로 latent vector가 긴 길이 생성에 도움을 준다.
+1. reconstruction loss는 cross entropy를 사용해 최종 출력과 실제 값을 비교한다.
+1. Adam optimizer를 학습에 사용한다.
+
+### 결과
+[Generated](https://github.com/JWHer/MusicVAE/tree/main/data/generated)
+
+<!-- 
+references  
+[medium](https://medium.com/@musicvaeubcse/musicvae-understanding-of-the-googles-work-for-interpolating-two-music-sequences-621dcbfa307c)  
+[VAE](https://deepinsight.tistory.com/127)
+-->
