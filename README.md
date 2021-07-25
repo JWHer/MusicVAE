@@ -12,21 +12,20 @@
 추후 모델 학습에 단점이 있음
 <br/>
 
-* library 설치
-*magenta에 필요한 라이브러리 설치*  
-<br/>
+* library 설치  
+    *magenta에 필요한 라이브러리 설치*  
 
-    installation [script](https://github.com/magenta/magenta/blob/main/magenta/tools/magenta-install.sh) 가 존재(conda) 하지만 [colab](https://colab.research.google.com/github/magenta/magenta-demos/blob/master/colab-notebooks/MusicVAE.ipynb#scrollTo=0x8YTRDwv8Gk) 예제에서 사용한 라이브러리 기반으로 직접 환경 구성
+    installation [script](https://github.com/magenta/magenta/blob/main/magenta/tools/magenta-install.sh) 가 존재(conda)  
+    하지만 [colab](https://colab.research.google.com/github/magenta/magenta-demos/blob/master/colab-notebooks/MusicVAE.ipynb#scrollTo=0x8YTRDwv8Gk) 예제에서 사용한 라이브러리 기반으로 직접 환경 구성
 
     ```shell
     # apt update, set superuser ...
     $ apt install libfluidsynth1 fluid-soundfont-gm build-essential libasound2-dev libjack-dev
     ```
+
 <br/>
 
-* python 세팅 - venv
-<br/>
-
+* python 세팅 - venv  
     ```shell
     # pip3 install virtualenv
     $ python3 -m venv $work_dir
@@ -38,11 +37,12 @@
     # required
     $ pip3 install tensorflow pyfluidsynth magenta
     ```
+
 <br/>
 
 * 논문
 
-    [링크추가]()  
+    [Arxiv](https://arxiv.org/pdf/1803.05428.pdf)  
     전반적인 내용 파악(abstract) ~~프린트만 한듯~~
 <br/>
 
@@ -147,7 +147,7 @@
     ```
 
 ## 6일차
-    (없음)
+(없음)
 
 ## 7일차
 설명
