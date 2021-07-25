@@ -134,16 +134,16 @@
     ```shell
     python3 music_vae_generate.py \
     --config=hier-drums_4bar \
-    --run_dir=/mnt/q/model/v2/ \
+    --run_dir=$run_dir \
     --mode=sample \
     --num_outputs=3 \
-    --output_dir=/home/jwher/data/generated/
+    --output_dir=data/generated/
     ```
     <br/>
 
 * 평가  
     ```shell
-    python3 music_vae_train.py --config=hier-drums_4bar --run_dir=/mnt/q/model/v2/ --mode=eval --examples_path=/home/jwher/data/tfrecord/drummer1/session1.tfrecord
+    python3 music_vae_train.py --config=hier-drums_4bar --run_dir=$run_dir --mode=eval --examples_path=data/tfrecord/drummer1/session1.tfrecord
     ```
 
 ## 6일차
