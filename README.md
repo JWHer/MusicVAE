@@ -153,8 +153,7 @@
 설명
 
 ### 이론
-ELBO와 KL Divergence
-(+추가)
+[ELBO와 KL Divergence](https://jwher.github.io/variable-autoencoder)  
 
 ### 데이터셋과 전처리  
 * MIDI 파일 사용  
